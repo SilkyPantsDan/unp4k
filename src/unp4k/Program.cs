@@ -61,7 +61,9 @@ namespace unp4k
 
 			using (var pakFile = File.OpenRead(arguments.dataPakPath))
 			{
-				var pak = new ZipFile(pakFile) { Key = key };
+				var pak = new ZipFile(pakFile);
+				pak.KeysRequired += (sender, args) => args.Key = key;
+
 				byte[] buf = new byte[4096];
 
 				foreach (ZipEntry entry in pak)
