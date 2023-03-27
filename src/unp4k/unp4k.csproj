@@ -21,4 +21,8 @@
     <ProjectReference Include="..\..\SharpZipLib\src\ICSharpCode.SharpZipLib\ICSharpCode.SharpZipLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="CommandLineArgumentsParser" Version="3.0.23" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,42 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "unp4k",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build_unp4k",
+            "program": "${workspaceFolder}/src/unp4k/bin/Debug/net6.0/unp4k.dll",
+            "args": [
+                "-i",
+                "C:/Program Files/Roberts Space Industries/StarCitizen/LIVE/Data.p4k",
+                "-o",
+                "${workspaceFolder}/../game-data/3.18.0/data-net6",
+                // "-s",
+                // "-e",
+                // "-w",
+                "-f",
+                ".xml,.ini",
+            ],
+            "cwd": "${workspaceFolder}/src/unp4k",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "unforge",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build_unforge",
+            "program": "${workspaceFolder}/src/unforge/bin/Debug/net6.0/unforge.dll",
+            "args": [
+                "${workspaceFolder}/../game-data/3.18.0/data-net6"
+            ],
+            "cwd": "${workspaceFolder}/src/unforge",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+    ]
+}

@@ -10,20 +10,56 @@ using System.Threading.Tasks;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using System.Net.Http;
+using CommandLineParser.Arguments;
 
 namespace unp4k
 {
-	class Program
+	
+			
+	class CommandLineArguments
 	{
+		[SwitchArgument('s', "smelt", true, Description = "Smelt files")]
+		public bool show;
+
+		[ValueArgument(typeof(string), 'i', "input", Description = "Path to SC Data.p4k")]
+		public string dataPakPath;
+
+		[ValueArgument(typeof(string), 'o', "output", Description = "Path to export data to")]
+		public string outputPath;
+
+		public List<string> filters;
+		[ValueArgument(typeof(string), 'f', "filter", Description = "Comma separated string of file extensions to filter on")]
+		public string FilterString
+		{
+			get => string.Join(",", filters.ToArray());
+			set { filters = value.Split(",").Select(x => x.Trim().ToLowerInvariant()).ToList(); }
+		}
+	};
+
+	class Program
+	{	
 		static void Main(string[] args)
 		{
 			var key = new Byte[] { 0x5E, 0x7A, 0x20, 0x02, 0x30, 0x2E, 0xEB, 0x1A, 0x3B, 0xB6, 0x17, 0xC3, 0x0F, 0xDE, 0x1E, 0x47 };
 
-			if (args.Length == 0) args = new[] { @"Data.p4k" };
+			CommandLineParser.CommandLineParser parser = new(); 
+			CommandLineArguments arguments = new();
 
-			if (args.Length == 1) args = new[] { args[0], "*.*" };
+			try {
+				parser.ExtractArgumentAttributes(arguments);
+				parser.ParseCommandLine(args);
+			}
+			catch {
+				parser.ShowUsage();
+				return;
+			}
 
-			using (var pakFile = File.OpenRead(args[0]))
+			if (Directory.Exists(arguments.outputPath) == false)
+			{
+				Directory.CreateDirectory(arguments.outputPath);
+			}
+
+			using (var pakFile = File.OpenRead(arguments.dataPakPath))
 			{
 				var pak = new ZipFile(pakFile) { Key = key };
 				byte[] buf = new byte[4096];
@@ -34,16 +70,20 @@ namespace unp4k
 					{
 						var crypto = entry.IsAesCrypted ? "Crypt" : "Plain";
 
-						if (args[1].StartsWith("*.")) args[1] = args[1].Substring(1);                                                                                           // Enable *.ext format for extensions
+						var extension = Path.GetExtension(entry.Name).ToLowerInvariant();
 
-						if (args[1] == ".*" ||                                                                                                                                 // Searching for everything
-							args[1] == "*" ||                                                                                                                                   // Searching for everything
-							entry.Name.ToLowerInvariant().Contains(args[1].ToLowerInvariant()) ||                                                                               // Searching for keywords / extensions
-							(args[1].EndsWith("xml", StringComparison.InvariantCultureIgnoreCase) && entry.Name.EndsWith(".dcb", StringComparison.InvariantCultureIgnoreCase))) // Searching for XMLs - include game.dcb
+						var shouldProcess = arguments.filters.Contains(extension);
+						shouldProcess |= extension == ".dcb";                                                                                        // Enable *.ext format for extensions
+
+						if (shouldProcess)
 						{
-							var target = new FileInfo(entry.Name);
+							var targetPath = Path.Join(arguments.outputPath, entry.Name);
+							var target = new FileInfo(targetPath);
 
-							if (!target.Directory.Exists) target.Directory.Create();
+							if (!target.Directory.Exists) 
+							{
+								target.Directory.Create();
+							}
 
 							if (!target.Exists)
 							{
@@ -51,7 +91,7 @@ namespace unp4k
 
 								using (Stream s = pak.GetInputStream(entry))
 								{
-									using (FileStream fs = File.Create(entry.Name))
+									using (FileStream fs = File.Create(targetPath))
 									{
 										StreamUtils.Copy(s, fs, buf);
 									}
