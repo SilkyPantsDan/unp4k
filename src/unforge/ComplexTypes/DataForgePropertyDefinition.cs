@@ -55,10 +55,10 @@ namespace unforge
                     attribute.Value = String.Format("{1}", this.DataType, this._br.ReadByte());
                     break;
                 case EDataType.varSingle:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadSingle());
+                    attribute.Value = String.Format("{1:F}", this.DataType, this._br.ReadSingle());
                     break;
                 case EDataType.varDouble:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadDouble());
+                    attribute.Value = String.Format("{1:F}", this.DataType, this._br.ReadDouble());
                     break;
                 case EDataType.varGuid:
                     attribute.Value = String.Format("{1}", this.DataType, this._br.ReadGuid(false));
