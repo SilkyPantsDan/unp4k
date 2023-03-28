@@ -1,22 +1,23 @@
 ﻿using CommandLineParser.Arguments;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
+using Serilog;
 
 namespace unp4k
 {
 	internal class CommandLineArguments
 	{
 		[SwitchArgument('s', "smelt", true, Description = "Smelt files")]
-		public bool smeltFiles;
+		public bool smeltFiles = true;
 
 		[SwitchArgument("report", false, Description = "Report Exceptions to server")]
-		public bool reportExceptions;
+		public bool reportExceptions = false;
 
 		[ValueArgument(typeof(string), 'i', "input", Description = "Path to SC Data.p4k")]
-		public string dataPakPath;
+		public string dataPakPath = null;
 
 		[ValueArgument(typeof(string), 'o', "output", Description = "Path to export data to")]
-		public string outputPath;
+		public string outputPath = null;
 
 		public List<string> filters;
 		[ValueArgument(typeof(string), 'f', "filter", Description = "Comma separated string of file extensions to filter on")]
@@ -46,6 +47,18 @@ namespace unp4k
 				parser.ShowUsage();
 				return;
 			}
+
+			Log.Logger = new LoggerConfiguration()
+    			.MinimumLevel.Verbose() // See everything
+				.WriteTo.Console(
+					restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information
+				)
+				.WriteTo.File("Log-.txt",
+					restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Debug,
+					rollingInterval: RollingInterval.Day,
+					outputTemplate: "{Timestamp:HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+				)
+				.CreateLogger();
 
 			if (Directory.Exists(arguments.outputPath) == false)
 			{
@@ -87,7 +100,7 @@ namespace unp4k
 
 						if (!target.Exists)
 						{
-							Console.WriteLine($"{entry.CompressionMethod} | {crypto} | {entry.Name}");
+							Log.Debug($"{entry.CompressionMethod} | {crypto} | {entry.Name}");
 
 							using Stream s = pak.GetInputStream(entry);
 							using FileStream fs = File.Create(targetPath);
@@ -97,7 +110,7 @@ namespace unp4k
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Exception while extracting {entry.Name}: {ex.Message}");
+					Log.Error($"Exception while extracting {entry.Name}: {ex.Message}");
 
 					if (arguments.reportExceptions)
 					{
@@ -117,16 +130,18 @@ namespace unp4k
 							using HttpResponseMessage errorReport = client.PostAsync($"{server}/p4k/exception/{entry.Name}", content).Result;
 							if (errorReport.StatusCode == System.Net.HttpStatusCode.OK)
 							{
-								Console.WriteLine("This exception has been reported.");
+								Log.Information("This exception has been reported.");
 							}
 						}
 						catch (Exception)
 						{
-							Console.WriteLine("There was a problem whilst attempting to report this error.");
+							Log.Error("There was a problem whilst attempting to report this error.");
 						}
 					}
 				}
 			}
+
+			Log.CloseAndFlush();
 		}
 	}
 }
