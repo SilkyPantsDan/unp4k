@@ -1,127 +1,118 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Linq;
+﻿using System.Xml;
 using System.Xml.Serialization;
 
 namespace unforge
 {
-    public enum ByteOrderEnum
-    {
-        AutoDetect,
-        BigEndian,
-        LittleEndian,
-    }
+	public enum ByteOrderEnum
+	{
+		AutoDetect,
+		BigEndian,
+		LittleEndian,
+	}
 
-    public static class CryXmlSerializer
-    {
-        public static Int64 ReadInt64(this BinaryReader br, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian)
-        {
-            var bytes = new Byte[] {
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-            };
+	public static class CryXmlSerializer
+	{
+		public static Int64 ReadInt64(this BinaryReader br, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian)
+		{
+			var bytes = new Byte[] {
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+			};
 
-            if (byteOrder == ByteOrderEnum.LittleEndian)
-                bytes = bytes.Reverse().ToArray();
+			if (byteOrder == ByteOrderEnum.LittleEndian)
+				bytes = bytes.Reverse().ToArray();
 
-            return BitConverter.ToInt64(bytes, 0);
-        }
+			return BitConverter.ToInt64(bytes, 0);
+		}
 
-        public static Int32 ReadInt32(this BinaryReader br, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian)
-        {
-            var bytes = new Byte[] {
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-            };
+		public static Int32 ReadInt32(this BinaryReader br, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian)
+		{
+			var bytes = new Byte[] {
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+			};
 
-            if (byteOrder == ByteOrderEnum.LittleEndian)
-                bytes = bytes.Reverse().ToArray();
+			if (byteOrder == ByteOrderEnum.LittleEndian)
+				bytes = bytes.Reverse().ToArray();
 
-            return BitConverter.ToInt32(bytes, 0);
-        }
+			return BitConverter.ToInt32(bytes, 0);
+		}
 
-        public static Int16 ReadInt16(this BinaryReader br, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian)
-        {
-            var bytes = new Byte[] {
-                br.ReadByte(),
-                br.ReadByte(),
-            };
+		public static Int16 ReadInt16(this BinaryReader br, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian)
+		{
+			var bytes = new Byte[] {
+				br.ReadByte(),
+				br.ReadByte(),
+			};
 
-            if (byteOrder == ByteOrderEnum.LittleEndian)
-                bytes = bytes.Reverse().ToArray();
+			if (byteOrder == ByteOrderEnum.LittleEndian)
+				bytes = bytes.Reverse().ToArray();
 
-            return BitConverter.ToInt16(bytes, 0);
-        }
+			return BitConverter.ToInt16(bytes, 0);
+		}
 
-        public static UInt64 ReadUInt64(this BinaryReader br, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian)
-        {
-            var bytes = new Byte[] {
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-            };
+		public static UInt64 ReadUInt64(this BinaryReader br, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian)
+		{
+			var bytes = new Byte[] {
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+			};
 
-            if (byteOrder == ByteOrderEnum.LittleEndian)
-                bytes = bytes.Reverse().ToArray();
+			if (byteOrder == ByteOrderEnum.LittleEndian)
+				bytes = bytes.Reverse().ToArray();
 
-            return BitConverter.ToUInt64(bytes, 0);
-        }
+			return BitConverter.ToUInt64(bytes, 0);
+		}
 
-        public static UInt32 ReadUInt32(this BinaryReader br, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian)
-        {
-            var bytes = new Byte[] {
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-                br.ReadByte(),
-            };
+		public static UInt32 ReadUInt32(this BinaryReader br, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian)
+		{
+			var bytes = new Byte[] {
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+				br.ReadByte(),
+			};
 
-            if (byteOrder == ByteOrderEnum.LittleEndian)
-                bytes = bytes.Reverse().ToArray();
+			if (byteOrder == ByteOrderEnum.LittleEndian)
+				bytes = bytes.Reverse().ToArray();
 
-            return BitConverter.ToUInt32(bytes, 0);
-        }
+			return BitConverter.ToUInt32(bytes, 0);
+		}
 
-        public static UInt16 ReadUInt16(this BinaryReader br, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian)
-        {
-            var bytes = new Byte[] {
-                br.ReadByte(),
-                br.ReadByte(),
-            };
+		public static UInt16 ReadUInt16(this BinaryReader br, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian)
+		{
+			var bytes = new Byte[] {
+				br.ReadByte(),
+				br.ReadByte(),
+			};
 
-            if (byteOrder == ByteOrderEnum.LittleEndian)
-                bytes = bytes.Reverse().ToArray();
+			if (byteOrder == ByteOrderEnum.LittleEndian)
+				bytes = bytes.Reverse().ToArray();
 
-            return BitConverter.ToUInt16(bytes, 0);
-        }
+			return BitConverter.ToUInt16(bytes, 0);
+		}
 
-        public static XmlDocument ReadFile(String inFile, ByteOrderEnum byteOrder = ByteOrderEnum.AutoDetect, Boolean writeLog = false)
-        {
-            return CryXmlSerializer.ReadStream(File.OpenRead(inFile), byteOrder, writeLog);
-        }
+		public static XmlDocument ReadFile(String inFile, ByteOrderEnum byteOrder = ByteOrderEnum.AutoDetect, Boolean writeLog = false)
+		{
+			return CryXmlSerializer.ReadStream(File.OpenRead(inFile), byteOrder, writeLog);
+		}
 
-        public static XmlDocument ReadStream(Stream inStream, ByteOrderEnum byteOrder = ByteOrderEnum.AutoDetect, Boolean writeLog = false)
-        {
+		public static XmlDocument ReadStream(Stream inStream, ByteOrderEnum byteOrder = ByteOrderEnum.AutoDetect, Boolean writeLog = false)
+		{
 			using BinaryReader br = new(inStream);
 			var peek = br.PeekChar();
 
@@ -349,8 +340,8 @@ namespace unforge
 			return xmlDoc;
 		}
 
-        public static TObject Deserialize<TObject>(String inFile, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian, Boolean writeLog = false) where TObject : class
-        {
+		public static TObject Deserialize<TObject>(String inFile, ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian, Boolean writeLog = false) where TObject : class
+		{
 			using MemoryStream ms = new();
 			var xmlDoc = CryXmlSerializer.ReadFile(inFile, byteOrder, writeLog);
 
@@ -362,5 +353,5 @@ namespace unforge
 
 			return xs.Deserialize(ms) as TObject;
 		}
-    }
+	}
 }

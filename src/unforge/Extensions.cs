@@ -1,60 +1,45 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
+﻿using System.Text.RegularExpressions;
 using System.Xml;
-using System.Xml.Serialization;
-using DDRIT = Dolkens.Framework.BinaryExtensions.ExtensionMethods;
-using System.Security.Cryptography;
-using Dolkens.Framework.BinaryExtensions;
-using System.Xml.XPath;
 using unforge;
-using System.Text.RegularExpressions;
+using DDRIT = Dolkens.Framework.BinaryExtensions.ExtensionMethods;
 
 namespace Dolkens.Framework.BinaryExtensions
 {
-    /// <summary>
-    /// The MIT License (MIT)
-    /// 
-    /// Copyright (c) 2008 Peter Dolkens
-    /// 
-    /// Permission is hereby granted, free of charge, to any person obtaining a copy
-    /// of this software and associated documentation files (the "Software"), to deal
-    /// in the Software without restriction, including without limitation the rights
-    /// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    /// copies of the Software, and to permit persons to whom the Software is
-    /// furnished to do so, subject to the following conditions:
-    /// 
-    /// The above copyright notice and this permission notice shall be included in
-    /// all copies or substantial portions of the Software.
-    /// 
-    /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    /// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    /// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    /// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    /// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-    /// THE SOFTWARE.
-    /// </summary>
-    public static class ExtensionMethods
-    {
-        #region Stream Extensions
+	/// <summary>
+	/// The MIT License (MIT)
+	/// 
+	/// Copyright (c) 2008 Peter Dolkens
+	/// 
+	/// Permission is hereby granted, free of charge, to any person obtaining a copy
+	/// of this software and associated documentation files (the "Software"), to deal
+	/// in the Software without restriction, including without limitation the rights
+	/// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	/// copies of the Software, and to permit persons to whom the Software is
+	/// furnished to do so, subject to the following conditions:
+	/// 
+	/// The above copyright notice and this permission notice shall be included in
+	/// all copies or substantial portions of the Software.
+	/// 
+	/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	/// THE SOFTWARE.
+	/// </summary>
+	public static class ExtensionMethods
+	{
+		#region Stream Extensions
 
-        /// <summary>
-        /// Read a Length-prefixed string from the stream
-        /// </summary>
-        /// <param name="binaryReader"></param>
-        /// <param name="byteLength">Size of the Length representation</param>
-        /// <returns></returns>
-        public static String ReadPString(this BinaryReader binaryReader, StringSizeEnum byteLength = StringSizeEnum.Int32)
-        {
+		/// <summary>
+		/// Read a Length-prefixed string from the stream
+		/// </summary>
+		/// <param name="binaryReader"></param>
+		/// <param name="byteLength">Size of the Length representation</param>
+		/// <returns></returns>
+		public static String ReadPString(this BinaryReader binaryReader, StringSizeEnum byteLength = StringSizeEnum.Int32)
+		{
 			var stringLength = byteLength switch
 			{
 				StringSizeEnum.Int8 => binaryReader.ReadByte(),
@@ -65,68 +50,68 @@ namespace Dolkens.Framework.BinaryExtensions
 
 			// If there is actually a string to read
 			if (stringLength > 0)
-            {
-                return new string(binaryReader.ReadChars(stringLength));
-            }
+			{
+				return new string(binaryReader.ReadChars(stringLength));
+			}
 
-            return null;
-        }
+			return null;
+		}
 
-        /// <summary>
-        /// Read a NULL-Terminated string from the stream
-        /// </summary>
-        /// <param name="binaryReader"></param>
-        /// <returns></returns>
-        public static String ReadCString(this BinaryReader binaryReader)
-        {
-            Int32 stringLength = 0;
+		/// <summary>
+		/// Read a NULL-Terminated string from the stream
+		/// </summary>
+		/// <param name="binaryReader"></param>
+		/// <returns></returns>
+		public static String ReadCString(this BinaryReader binaryReader)
+		{
+			Int32 stringLength = 0;
 
-            while (binaryReader.BaseStream.Position < binaryReader.BaseStream.Length && binaryReader.ReadChar() != 0)
-                stringLength++;
+			while (binaryReader.BaseStream.Position < binaryReader.BaseStream.Length && binaryReader.ReadChar() != 0)
+				stringLength++;
 
-            Int64 nul = binaryReader.BaseStream.Position;
+			Int64 nul = binaryReader.BaseStream.Position;
 
-            binaryReader.BaseStream.Seek(0 - stringLength - 1, SeekOrigin.Current);
+			binaryReader.BaseStream.Seek(0 - stringLength - 1, SeekOrigin.Current);
 
-            Char[] chars = binaryReader.ReadChars(stringLength + 1);
+			Char[] chars = binaryReader.ReadChars(stringLength + 1);
 
-            binaryReader.BaseStream.Seek(nul, SeekOrigin.Begin);
+			binaryReader.BaseStream.Seek(nul, SeekOrigin.Begin);
 
 			// Why is this necessary?
 			if (stringLength > chars.Length) stringLength = chars.Length;
 
-            // If there is actually a string to read
-            if (stringLength > 0)
-            {
-                return new String(chars, 0, stringLength).Replace("\u0000", "");
-            }
+			// If there is actually a string to read
+			if (stringLength > 0)
+			{
+				return new String(chars, 0, stringLength).Replace("\u0000", "");
+			}
 
-            return null;
-        }
+			return null;
+		}
 
-        /// <summary>
-        /// Read a Fixed-Length string from the stream
-        /// </summary>
-        /// <param name="binaryReader"></param>
-        /// <param name="stringLength">Size of the String</param>
-        /// <returns></returns>
-        public static String ReadFString(this BinaryReader binaryReader, Int32 stringLength)
-        {
-            Char[] chars = binaryReader.ReadChars(stringLength);
+		/// <summary>
+		/// Read a Fixed-Length string from the stream
+		/// </summary>
+		/// <param name="binaryReader"></param>
+		/// <param name="stringLength">Size of the String</param>
+		/// <returns></returns>
+		public static String ReadFString(this BinaryReader binaryReader, Int32 stringLength)
+		{
+			Char[] chars = binaryReader.ReadChars(stringLength);
 
-            for (Int32 i = 0; i < stringLength; i++)
-            {
-                if (chars[i] == 0)
-                {
-                    return new String(chars, 0, i);
-                }
-            }
+			for (Int32 i = 0; i < stringLength; i++)
+			{
+				if (chars[i] == 0)
+				{
+					return new String(chars, 0, i);
+				}
+			}
 
-            return new String(chars);
-        }
+			return new String(chars);
+		}
 
-        public static Byte[] ReadAllBytes(this Stream stream)
-        {
+		public static Byte[] ReadAllBytes(this Stream stream)
+		{
 			using MemoryStream ms = new();
 			long oldPosition = stream.Position;
 			stream.Position = 0;
@@ -135,26 +120,26 @@ namespace Dolkens.Framework.BinaryExtensions
 			return ms.ToArray();
 		}
 
-        public static Guid? ReadGuid(this BinaryReader reader, Boolean nullable = true)
-        {
-            var isNull = nullable && reader.ReadInt32() == -1;
+		public static Guid? ReadGuid(this BinaryReader reader, Boolean nullable = true)
+		{
+			var isNull = nullable && reader.ReadInt32() == -1;
 
-            var c = reader.ReadInt16();
-            var b = reader.ReadInt16();
-            var a = reader.ReadInt32();
-            var k = reader.ReadByte();
-            var j = reader.ReadByte();
-            var i = reader.ReadByte();
-            var h = reader.ReadByte();
-            var g = reader.ReadByte();
-            var f = reader.ReadByte();
-            var e = reader.ReadByte();
-            var d = reader.ReadByte();
+			var c = reader.ReadInt16();
+			var b = reader.ReadInt16();
+			var a = reader.ReadInt32();
+			var k = reader.ReadByte();
+			var j = reader.ReadByte();
+			var i = reader.ReadByte();
+			var h = reader.ReadByte();
+			var g = reader.ReadByte();
+			var f = reader.ReadByte();
+			var e = reader.ReadByte();
+			var d = reader.ReadByte();
 
-            if (isNull) return null;
+			if (isNull) return null;
 
-            return new Guid(a, b, c, d, e, f, g, h, i, j, k);
-        }
+			return new Guid(a, b, c, d, e, f, g, h, i, j, k);
+		}
 
 		#endregion
 
@@ -162,108 +147,108 @@ namespace Dolkens.Framework.BinaryExtensions
 
 		private static readonly Regex cleanString = new("[^a-zA-Z0-9.]");
 
-        public static XmlElement Rename(this XmlElement element, String name)
-        {
-            var buffer = element.OwnerDocument.CreateElement(cleanString.Replace(name, "_"));
+		public static XmlElement Rename(this XmlElement element, String name)
+		{
+			var buffer = element.OwnerDocument.CreateElement(cleanString.Replace(name, "_"));
 
-            while (element.ChildNodes.Count > 0)
-            {
-                buffer.AppendChild(element.ChildNodes[0]);
-            }
+			while (element.ChildNodes.Count > 0)
+			{
+				buffer.AppendChild(element.ChildNodes[0]);
+			}
 
-            while (element.Attributes.Count > 0)
-            {
-                XmlAttribute attribute = element.Attributes[0];
-                buffer.Attributes.Append(attribute);
-            }
+			while (element.Attributes.Count > 0)
+			{
+				XmlAttribute attribute = element.Attributes[0];
+				buffer.Attributes.Append(attribute);
+			}
 
-            return buffer;
-        }
+			return buffer;
+		}
 
-        public static String GetPath(this XmlNode target)
-        {
-            List<KeyValuePair<string, int?>> path = new();
+		public static String GetPath(this XmlNode target)
+		{
+			List<KeyValuePair<string, int?>> path = new();
 
-            while (target.ParentNode != null)
-            {
-                var siblings = target.ParentNode.SelectNodes(target.Name);
-                if (siblings.Count > 1)
-                {
-                    var siblingIndex = 0;
-                    foreach (var sibling in siblings)
-                    {
-                        if (sibling == target)
-                        {
-                            path.Add(new KeyValuePair<String, Int32?>(target.ParentNode.Name, siblingIndex));
-                        }
+			while (target.ParentNode != null)
+			{
+				var siblings = target.ParentNode.SelectNodes(target.Name);
+				if (siblings.Count > 1)
+				{
+					var siblingIndex = 0;
+					foreach (var sibling in siblings)
+					{
+						if (sibling == target)
+						{
+							path.Add(new KeyValuePair<String, Int32?>(target.ParentNode.Name, siblingIndex));
+						}
 
-                        siblingIndex++;
-                    }
-                }
-                else
-                {
-                    path.Add(new KeyValuePair<String, Int32?>(target.ParentNode.Name, null));
-                }
+						siblingIndex++;
+					}
+				}
+				else
+				{
+					path.Add(new KeyValuePair<String, Int32?>(target.ParentNode.Name, null));
+				}
 
-                target = target.ParentNode;
-            }
+				target = target.ParentNode;
+			}
 
-            path.Reverse();
+			path.Reverse();
 
-            return String.Join(".", path.Skip(3).Select(p => p.Value.HasValue ? String.Format("{0}[{1}]", p.Key, p.Value) : p.Key));
-        }
+			return String.Join(".", path.Skip(3).Select(p => p.Value.HasValue ? String.Format("{0}[{1}]", p.Key, p.Value) : p.Key));
+		}
 
-        #endregion
-    }
+		#endregion
+	}
 }
 
 #region Namespace Proxies
 
 namespace System
 {
-    public static class Proxy
-    {
-        /// <summary>
-        /// Read a Length-prefixed string from the stream
-        /// </summary>
-        /// <param name="binaryReader"></param>
-        /// <param name="byteLength">Size of the Length representation</param>
-        /// <returns></returns>
-        public static String ReadPString(this BinaryReader binaryReader, StringSizeEnum byteLength = StringSizeEnum.Int32) { return DDRIT.ReadPString(binaryReader, byteLength); }
+	public static class Proxy
+	{
+		/// <summary>
+		/// Read a Length-prefixed string from the stream
+		/// </summary>
+		/// <param name="binaryReader"></param>
+		/// <param name="byteLength">Size of the Length representation</param>
+		/// <returns></returns>
+		public static String ReadPString(this BinaryReader binaryReader, StringSizeEnum byteLength = StringSizeEnum.Int32) { return DDRIT.ReadPString(binaryReader, byteLength); }
 
-        /// <summary>
-        /// Read a NULL-Terminated string from the stream
-        /// </summary>
-        /// <param name="binaryReader"></param>
-        /// <returns></returns>
-        public static String ReadCString(this BinaryReader binaryReader) { return DDRIT.ReadCString(binaryReader); }
+		/// <summary>
+		/// Read a NULL-Terminated string from the stream
+		/// </summary>
+		/// <param name="binaryReader"></param>
+		/// <returns></returns>
+		public static String ReadCString(this BinaryReader binaryReader) { return DDRIT.ReadCString(binaryReader); }
 
-        /// <summary>
-        /// Read a Fixed-Length string from the stream
-        /// </summary>
-        /// <param name="binaryReader"></param>
-        /// <param name="stringLength">Size of the String</param>
-        /// <returns></returns>
-        public static String ReadFString(this BinaryReader binaryReader, Int32 stringLength) { return DDRIT.ReadFString(binaryReader, stringLength); }
-    }
+		/// <summary>
+		/// Read a Fixed-Length string from the stream
+		/// </summary>
+		/// <param name="binaryReader"></param>
+		/// <param name="stringLength">Size of the String</param>
+		/// <returns></returns>
+		public static String ReadFString(this BinaryReader binaryReader, Int32 stringLength) { return DDRIT.ReadFString(binaryReader, stringLength); }
+	}
 }
 
 namespace System.IO
 {
-    public static class Proxy
-    {
-        public static Byte[] ReadAllBytes(this Stream stream) { return DDRIT.ReadAllBytes(stream); }
-        public static Guid? ReadGuid(this BinaryReader reader, Boolean nullable = true) { return DDRIT.ReadGuid(reader, nullable); }
-    }
+	public static class Proxy
+	{
+		public static Byte[] ReadAllBytes(this Stream stream) { return DDRIT.ReadAllBytes(stream); }
+		public static Guid? ReadGuid(this BinaryReader reader, Boolean nullable = true) { return DDRIT.ReadGuid(reader, nullable); }
+	}
 }
 
 namespace System.Xml
 {
-    public static class Proxy
-    {
-        public static XmlElement Rename(this XmlElement element, String name) { return DDRIT.Rename(element, name); }
-        public static String GetPath(this XmlElement element) { return DDRIT.GetPath(element); }
-    }
+	public static class Proxy
+	{
+		public static XmlElement Rename(this XmlElement element, String name) { return DDRIT.Rename(element, name); }
+		public static String GetPath(this XmlElement element) { return DDRIT.GetPath(element); }
+	}
 }
 
 #endregion

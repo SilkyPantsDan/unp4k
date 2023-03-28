@@ -49,7 +49,7 @@ namespace unp4k
 			}
 
 			Log.Logger = new LoggerConfiguration()
-    			.MinimumLevel.Verbose() // See everything
+				.MinimumLevel.Verbose() // See everything
 				.WriteTo.Console(
 					restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information
 				)
@@ -64,7 +64,7 @@ namespace unp4k
 			{
 				_ = Directory.CreateDirectory(arguments.outputPath);
 			}
-			
+
 			if (arguments.filters.Contains(".xml"))
 			{
 				// Add .dcb as this contains more XMLs for processing later
