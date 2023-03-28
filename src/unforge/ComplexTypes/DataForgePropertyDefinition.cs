@@ -34,10 +34,10 @@ namespace unforge
             switch (this.DataType)
             {
                 case EDataType.varReference:
-                    attribute.Value = String.Format("{2}", this.DataType, this._br.ReadUInt32(), this._br.ReadGuid(false));
+                    attribute.Value = this._br.ReadGuid(false).ToString();
                     break;
                 case EDataType.varLocale:
-                    attribute.Value = String.Format("{1}", this.DataType, this.DocumentRoot.ValueMap[this._br.ReadUInt32()]);
+                    attribute.Value = this.DocumentRoot.ValueMap[this._br.ReadUInt32()];
                     break;
                 case EDataType.varStrongPointer:
                     attribute.Value = String.Format("{0}:{1:X8} {2:X8}", this.DataType, this._br.ReadUInt32(), this._br.ReadUInt32());
@@ -45,51 +45,51 @@ namespace unforge
                 case EDataType.varWeakPointer:
                     var structIndex = this._br.ReadUInt32();
                     var itemIndex = this._br.ReadUInt32();
-                    attribute.Value = String.Format("{0}:{1:X8} {1:X8}", this.DataType, structIndex, itemIndex);
+                    attribute.Value = String.Format("{0}:{1:X8} {1:X8}", this.DataType, structIndex);
                     this.DocumentRoot.Require_WeakMapping2.Add(new ClassMapping { Node = attribute, StructIndex = (UInt16)structIndex, RecordIndex = (Int32)itemIndex });
                     break;
                 case EDataType.varString:
-                    attribute.Value = String.Format("{1}", this.DataType, this.DocumentRoot.ValueMap[this._br.ReadUInt32()]);
+                    attribute.Value = this.DocumentRoot.ValueMap[this._br.ReadUInt32()];
                     break;
                 case EDataType.varBoolean:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadByte());
+                    attribute.Value = this._br.ReadByte().ToString();
                     break;
                 case EDataType.varSingle:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadSingle());
+                    attribute.Value = this._br.ReadSingle().ToString();
                     break;
                 case EDataType.varDouble:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadDouble());
+                    attribute.Value = this._br.ReadDouble().ToString();
                     break;
                 case EDataType.varGuid:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadGuid(false));
+                    attribute.Value = this._br.ReadGuid(false).ToString();
                     break;
                 case EDataType.varSByte:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadSByte());
+                    attribute.Value = this._br.ReadSByte().ToString();
                     break;
                 case EDataType.varInt16:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadInt16());
+                    attribute.Value = this._br.ReadInt16().ToString();
                     break;
                 case EDataType.varInt32:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadInt32());
+                    attribute.Value = this._br.ReadInt32().ToString();
                     break;
                 case EDataType.varInt64:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadInt64());
+                    attribute.Value = this._br.ReadInt64().ToString();
                     break;
                 case EDataType.varByte:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadByte());
+                    attribute.Value = this._br.ReadByte().ToString();
                     break;
                 case EDataType.varUInt16:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadUInt16());
+                    attribute.Value = this._br.ReadUInt16().ToString();
                     break;
                 case EDataType.varUInt32:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadUInt32());
+                    attribute.Value = this._br.ReadUInt32().ToString();
                     break;
                 case EDataType.varUInt64:
-                    attribute.Value = String.Format("{1}", this.DataType, this._br.ReadUInt64());
+                    attribute.Value = this._br.ReadUInt64().ToString();
                     break;
                 case EDataType.varEnum:
-                    var enumDefinition = this.DocumentRoot.EnumDefinitionTable[this.StructIndex];
-                    attribute.Value = String.Format("{1}", enumDefinition.Name, this.DocumentRoot.ValueMap[this._br.ReadUInt32()]);
+                    // var enumDefinition = this.DocumentRoot.EnumDefinitionTable[this.StructIndex];
+                    attribute.Value = this.DocumentRoot.ValueMap[this._br.ReadUInt32()];
                     break;
                 default:
                     throw new NotImplementedException();

@@ -221,7 +221,7 @@ namespace Dolkens.Framework.BinaryExtensions
 
 namespace System
 {
-    public static class _Proxy
+    public static class Proxy
     {
         /// <summary>
         /// Read a Length-prefixed string from the stream
@@ -250,7 +250,7 @@ namespace System
 
 namespace System.IO
 {
-    public static class _Proxy
+    public static class Proxy
     {
         public static Byte[] ReadAllBytes(this Stream stream) { return DDRIT.ReadAllBytes(stream); }
         public static Guid? ReadGuid(this BinaryReader reader, Boolean nullable = true) { return DDRIT.ReadGuid(reader, nullable); }
@@ -259,7 +259,7 @@ namespace System.IO
 
 namespace System.Xml
 {
-    public static class _Proxy
+    public static class Proxy
     {
         public static XmlElement Rename(this XmlElement element, String name) { return DDRIT.Rename(element, name); }
         public static String GetPath(this XmlElement element) { return DDRIT.GetPath(element); }

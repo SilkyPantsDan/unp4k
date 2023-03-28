@@ -16,15 +16,15 @@ namespace unforge
         public String FileName { get { return this.DocumentRoot.ValueMap[this.FileNameOffset]; } }
         public UInt32 FileNameOffset { get; set; }
 
-        public String __structIndex { get { return String.Format("{0:X4}", this.StructIndex); } }
+        public String StructIndexString { get { return String.Format("{0:X4}", this.StructIndex); } }
         public UInt32 StructIndex { get; set; }
 
         public Guid? Hash { get; set; }
 
-        public String __variantIndex { get { return String.Format("{0:X4}", this.VariantIndex); } }
+        public String VariantIndexString { get { return String.Format("{0:X4}", this.VariantIndex); } }
         public UInt16 VariantIndex { get; set; }
 
-        public String __otherIndex { get { return String.Format("{0:X4}", this.OtherIndex); } }
+        public String OtherIndexString { get { return String.Format("{0:X4}", this.OtherIndex); } }
         public UInt16 OtherIndex { get; set; }
 
         public DataForgeRecord(DataForge documentRoot)

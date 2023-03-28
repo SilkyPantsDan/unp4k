@@ -12,16 +12,16 @@ namespace unforge
         public UInt32 NameOffset { get; set; }
         public String Name { get { return this.DocumentRoot.ValueMap[this.NameOffset]; } }
 
-        public String __parentTypeIndex { get { return String.Format("{0:X4}", this.ParentTypeIndex); } }
+        public String ParentTypeIndexString { get { return String.Format("{0:X4}", this.ParentTypeIndex); } }
         public UInt32 ParentTypeIndex { get; set; }
 
-        public String __attributeCount { get { return String.Format("{0:X4}", this.AttributeCount); } }
+        public String AttributeCountString { get { return String.Format("{0:X4}", this.AttributeCount); } }
         public UInt16 AttributeCount { get; set; }
 
-        public String __firstAttributeIndex { get { return String.Format("{0:X4}", this.FirstAttributeIndex); } }
+        public String FirstAttributeIndexString { get { return String.Format("{0:X4}", this.FirstAttributeIndex); } }
         public UInt16 FirstAttributeIndex { get; set; }
 
-        public String __nodeType { get { return String.Format("{0:X4}", this.NodeType); } }
+        public String NodeTypeString { get { return String.Format("{0:X4}", this.NodeType); } }
         public UInt32 NodeType { get; set; }
 
         public DataForgeStructDefinition(DataForge documentRoot)
@@ -172,10 +172,10 @@ namespace unforge
                                 throw new NotImplementedException();
 
                                 // var tempe = this.DocumentRoot.CreateElement(String.Format("{0}", node.DataType));
-                                // var tempa = this.DocumentRoot.CreateAttribute("__child");
+                                // var tempa = this.DocumentRoot.CreateAttribute("ChildString");
                                 // tempa.Value = (firstIndex + i).ToString();
                                 // tempe.Attributes.Append(tempa);
-                                // var tempb = this.DocumentRoot.CreateAttribute("__parent");
+                                // var tempb = this.DocumentRoot.CreateAttribute("ParentString");
                                 // tempb.Value = node.StructIndex.ToString();
                                 // tempe.Attributes.Append(tempb);
                                 // child.AppendChild(tempe);
@@ -187,13 +187,13 @@ namespace unforge
                 }
             }
 
-            attribute = this.DocumentRoot.CreateAttribute("__type");
+            attribute = this.DocumentRoot.CreateAttribute("TypeString");
             attribute.Value = baseStruct.Name;
             element.Attributes.Append(attribute);
 
             if (this.ParentTypeIndex != 0xFFFFFFFF)
             {
-                attribute = this.DocumentRoot.CreateAttribute("__polymorphicType");
+                attribute = this.DocumentRoot.CreateAttribute("PolymorphicTypeString");
                 attribute.Value = this.Name;
                 element.Attributes.Append(attribute);
             }
