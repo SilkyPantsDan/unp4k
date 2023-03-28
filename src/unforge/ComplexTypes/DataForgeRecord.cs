@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace unforge
 {
-    public class DataForgeRecord : _DataForgeSerializable
+    public class DataForgeRecord : DataForgeSerializable
     {
         public UInt32 NameOffset { get; set; }
         public String Name { get { return this.DocumentRoot.ValueMap[this.NameOffset]; } }

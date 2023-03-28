@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace unforge
 {
-    public class DataForgeStructDefinition : _DataForgeSerializable
+    public class DataForgeStructDefinition : DataForgeSerializable
     {
         public UInt32 NameOffset { get; set; }
         public String Name { get { return this.DocumentRoot.ValueMap[this.NameOffset]; } }
@@ -302,7 +302,7 @@ namespace unforge
                 };
                 var propertyName = property.Name;
 
-                propertyName = String.Format("{0}{1}", propertyName[0].ToString().ToUpper(), propertyName.Substring(1));
+                propertyName = string.Format("{0}{1}", propertyName[0].ToString().ToUpper(), propertyName[1..]);
 
                 if (keywords.Contains(propertyName))
                 {

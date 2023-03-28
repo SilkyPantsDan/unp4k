@@ -7,9 +7,9 @@ using System.Xml;
 
 namespace unforge
 {
-    public class DataForgeEnum : _DataForgeSerializable
+    public class DataForgeEnum : DataForgeSerializable
     {
-        private UInt32 _value;
+        private readonly UInt32 _value;
         public String Value { get { return this.DocumentRoot.ValueMap[this._value]; } }
 
         public DataForgeEnum(DataForge documentRoot)

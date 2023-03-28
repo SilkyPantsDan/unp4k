@@ -66,7 +66,7 @@ namespace unforge
         internal List<ClassMapping> Require_WeakMapping2 { get; set; }
         internal List<XmlElement> DataTable { get; set; }
 
-        internal U[] ReadArray<U>(Int32 arraySize) where U : _DataForgeSerializable
+        internal U[] ReadArray<U>(Int32 arraySize) where U : DataForgeSerializable
         {
             if (arraySize == -1)
             {
@@ -221,7 +221,7 @@ namespace unforge
             }
         }
 
-        private XmlDocument _xmlDocument = new XmlDocument();
+        private readonly XmlDocument _xmlDocument = new();
 
 		internal XmlElement CreateElement(String name) { return this._xmlDocument.CreateElement(name); }
         internal XmlAttribute CreateAttribute(String name) { return this._xmlDocument.CreateAttribute(name); }
@@ -252,7 +252,7 @@ namespace unforge
 
 				if (!Directory.Exists(Path.GetDirectoryName(newPath))) Directory.CreateDirectory(Path.GetDirectoryName(newPath));
 
-				XmlDocument doc = new XmlDocument { };
+				XmlDocument doc = new();
 				doc.LoadXml(this.DataMap[record.StructIndex][record.VariantIndex].OuterXml);
 				doc.Save(newPath);
 			}
@@ -481,7 +481,7 @@ namespace unforge
 
 				if (!Directory.Exists(Path.GetDirectoryName(newPath))) Directory.CreateDirectory(Path.GetDirectoryName(newPath));
 
-				XmlDocument doc = new XmlDocument { };
+				XmlDocument doc = new();
 				doc.LoadXml(this.DataMap[record.StructIndex][record.VariantIndex].OuterXml);
 
 				yield return (FileName: newPath, XmlDocument: doc);

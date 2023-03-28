@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace unforge
 {
-    public class DataForgeEnumDefinition : _DataForgeSerializable
+    public class DataForgeEnumDefinition : DataForgeSerializable
     {
         public UInt32 NameOffset { get; set; }
         public String Name { get { return this.DocumentRoot.ValueMap[this.NameOffset]; } }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace unforge
 {
-    public class DataForgeDataMapping : _DataForgeSerializable
+    public class DataForgeDataMapping : DataForgeSerializable
     {
         public UInt32 StructIndex { get; set; }
         public UInt32 StructCount { get; set; }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace unforge
 {
-    public class DataForgeString : _DataForgeSerializable
+    public class DataForgeString : DataForgeSerializable
     {
         public String Value { get; set; }
 

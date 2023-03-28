@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace unforge
 {
-    public class DataForgeUInt32 : _DataForgeSerializable
+    public class DataForgeUInt32 : DataForgeSerializable
     {
         public UInt32 Value { get; set; }
 

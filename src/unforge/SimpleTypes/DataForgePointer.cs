@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace unforge
 {
-    public class DataForgePointer : _DataForgeSerializable
+    public class DataForgePointer : DataForgeSerializable
     {
         public UInt32 StructType { get; set; }
         public UInt32 Index { get; set; }

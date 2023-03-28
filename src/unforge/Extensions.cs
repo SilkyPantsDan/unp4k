@@ -55,27 +55,18 @@ namespace Dolkens.Framework.BinaryExtensions
         /// <returns></returns>
         public static String ReadPString(this BinaryReader binaryReader, StringSizeEnum byteLength = StringSizeEnum.Int32)
         {
-            Int32 stringLength = 0;
+			var stringLength = byteLength switch
+			{
+				StringSizeEnum.Int8 => binaryReader.ReadByte(),
+				StringSizeEnum.Int16 => binaryReader.ReadInt16(),
+				StringSizeEnum.Int32 => binaryReader.ReadInt32(),
+				_ => throw new NotSupportedException("Only Int8, Int16, and Int32 string sizes are supported"),
+			};
 
-            switch (byteLength)
+			// If there is actually a string to read
+			if (stringLength > 0)
             {
-                case StringSizeEnum.Int8:
-                    stringLength = binaryReader.ReadByte();
-                    break;
-                case StringSizeEnum.Int16:
-                    stringLength = binaryReader.ReadInt16();
-                    break;
-                case StringSizeEnum.Int32:
-                    stringLength = binaryReader.ReadInt32();
-                    break;
-                default:
-                    throw new NotSupportedException("Only Int8, Int16, and Int32 string sizes are supported");
-            }
-
-            // If there is actually a string to read
-            if (stringLength > 0)
-            {
-                return new String(binaryReader.ReadChars(stringLength));
+                return new string(binaryReader.ReadChars(stringLength));
             }
 
             return null;
@@ -136,15 +127,13 @@ namespace Dolkens.Framework.BinaryExtensions
 
         public static Byte[] ReadAllBytes(this Stream stream)
         {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                Int64 oldPosition = stream.Position;
-                stream.Position = 0;
-                stream.CopyTo(ms);
-                stream.Position = oldPosition;
-                return ms.ToArray();
-            }
-        }
+			using MemoryStream ms = new();
+			long oldPosition = stream.Position;
+			stream.Position = 0;
+			stream.CopyTo(ms);
+			stream.Position = oldPosition;
+			return ms.ToArray();
+		}
 
         public static Guid? ReadGuid(this BinaryReader reader, Boolean nullable = true)
         {
@@ -171,7 +160,7 @@ namespace Dolkens.Framework.BinaryExtensions
 
 		#region Xml Extensions
 
-		private static Regex cleanString = new Regex("[^a-zA-Z0-9.]");
+		private static readonly Regex cleanString = new("[^a-zA-Z0-9.]");
 
         public static XmlElement Rename(this XmlElement element, String name)
         {
@@ -193,7 +182,7 @@ namespace Dolkens.Framework.BinaryExtensions
 
         public static String GetPath(this XmlNode target)
         {
-            List<KeyValuePair<String, Int32?>> path = new List<KeyValuePair<String, Int32?>> { };
+            List<KeyValuePair<string, int?>> path = new();
 
             while (target.ParentNode != null)
             {
