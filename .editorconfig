@@ -33,3 +33,9 @@ indent_size = 2
 end_of_line = lf
 [*.{cmd, bat}]
 end_of_line = crlf
+
+
+[*.cs]
+dotnet_diagnostic.CA2241.severity = none
+dotnet_diagnostic.IDE1006.severity = none
+
