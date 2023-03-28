@@ -1,25 +1,16 @@
-﻿using ICSharpCode.SharpZipLib.Core;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CommandLineParser.Arguments;
+using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
-using ICSharpCode.SharpZipLib.Zip.Compression;
-using System.Net.Http;
-using CommandLineParser.Arguments;
 
 namespace unp4k
 {
-	
-			
-	class CommandLineArguments
+	internal class CommandLineArguments
 	{
 		[SwitchArgument('s', "smelt", true, Description = "Smelt files")]
-		public bool show;
+		public bool smeltFiles;
+
+		[SwitchArgument("report", false, Description = "Report Exceptions to server")]
+		public bool reportExceptions;
 
 		[ValueArgument(typeof(string), 'i', "input", Description = "Path to SC Data.p4k")]
 		public string dataPakPath;
@@ -32,102 +23,101 @@ namespace unp4k
 		public string FilterString
 		{
 			get => string.Join(",", filters.ToArray());
-			set { filters = value.Split(",").Select(x => x.Trim().ToLowerInvariant()).ToList(); }
+			set => filters = value.Split(",").Select(x => x.Trim().ToLowerInvariant()).ToList();
 		}
 	};
 
-	class Program
-	{	
-		static void Main(string[] args)
+	internal class Program
+	{
+		private static void Main(string[] args)
 		{
 			var key = new Byte[] { 0x5E, 0x7A, 0x20, 0x02, 0x30, 0x2E, 0xEB, 0x1A, 0x3B, 0xB6, 0x17, 0xC3, 0x0F, 0xDE, 0x1E, 0x47 };
 
-			CommandLineParser.CommandLineParser parser = new(); 
+			CommandLineParser.CommandLineParser parser = new();
 			CommandLineArguments arguments = new();
 
-			try {
+			try
+			{
 				parser.ExtractArgumentAttributes(arguments);
 				parser.ParseCommandLine(args);
 			}
-			catch {
+			catch
+			{
 				parser.ShowUsage();
 				return;
 			}
 
 			if (Directory.Exists(arguments.outputPath) == false)
 			{
-				Directory.CreateDirectory(arguments.outputPath);
+				_ = Directory.CreateDirectory(arguments.outputPath);
+			}
+			
+			if (arguments.filters.Contains(".xml"))
+			{
+				// Add .dcb as this contains more XMLs for processing later
+				arguments.filters.Add(".dcb");
 			}
 
-			using (var pakFile = File.OpenRead(arguments.dataPakPath))
+			using FileStream pakFile = File.OpenRead(arguments.dataPakPath);
+			ZipFile pak = new(pakFile);
+			pak.KeysRequired += (sender, args) => args.Key = key;
+
+			byte[] buf = new byte[4096];
+			foreach (ZipEntry entry in pak)
 			{
-				var pak = new ZipFile(pakFile);
-				pak.KeysRequired += (sender, args) => args.Key = key;
-
-				byte[] buf = new byte[4096];
-
-				foreach (ZipEntry entry in pak)
+				try
 				{
-					try
+					string crypto = entry.IsAesCrypted ? "Crypt" : "Plain";
+
+					string extension = Path.GetExtension(entry.Name).ToLowerInvariant();
+
+					bool shouldProcess = arguments.filters.Count == 0
+						|| arguments.filters.Contains(".*")
+						|| arguments.filters.Contains(extension);
+
+					if (shouldProcess)
 					{
-						var crypto = entry.IsAesCrypted ? "Crypt" : "Plain";
+						string targetPath = Path.Join(arguments.outputPath, entry.Name);
+						FileInfo target = new(targetPath);
 
-						var extension = Path.GetExtension(entry.Name).ToLowerInvariant();
-
-						var shouldProcess = arguments.filters.Contains(extension);
-						shouldProcess |= extension == ".dcb";                                                                                        // Enable *.ext format for extensions
-
-						if (shouldProcess)
+						if (!target.Directory.Exists)
 						{
-							var targetPath = Path.Join(arguments.outputPath, entry.Name);
-							var target = new FileInfo(targetPath);
+							target.Directory.Create();
+						}
 
-							if (!target.Directory.Exists) 
-							{
-								target.Directory.Create();
-							}
+						if (!target.Exists)
+						{
+							Console.WriteLine($"{entry.CompressionMethod} | {crypto} | {entry.Name}");
 
-							if (!target.Exists)
-							{
-								Console.WriteLine($"{entry.CompressionMethod} | {crypto} | {entry.Name}");
-
-								using (Stream s = pak.GetInputStream(entry))
-								{
-									using (FileStream fs = File.Create(targetPath))
-									{
-										StreamUtils.Copy(s, fs, buf);
-									}
-								}
-
-								// target.Delete();
-							}
+							using Stream s = pak.GetInputStream(entry);
+							using FileStream fs = File.Create(targetPath);
+							StreamUtils.Copy(s, fs, buf);
 						}
 					}
-					catch (Exception ex)
-					{
-						Console.WriteLine($"Exception while extracting {entry.Name}: {ex.Message}");
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Exception while extracting {entry.Name}: {ex.Message}");
 
+					if (arguments.reportExceptions)
+					{
 						try
 						{
-							using (var client = new HttpClient { })
+							using HttpClient client = new() { };
+							// var server = "http://herald.holoxplor.local";
+							string server = "https://herald.holoxplor.space";
+
+							client.DefaultRequestHeaders.Add("client", "unp4k");
+
+							using MultipartFormDataContent content = new("UPLOAD----")
 							{
-								// var server = "http://herald.holoxplor.local";
-								var server = "https://herald.holoxplor.space";
+								{ new StringContent($"{ex.Message}\r\n\r\n{ex.StackTrace}"), "exception", entry.Name }
+							};
 
-								client.DefaultRequestHeaders.Add("client", "unp4k");
-
-								using (var content = new MultipartFormDataContent("UPLOAD----"))
-								{
-									content.Add(new StringContent($"{ex.Message}\r\n\r\n{ex.StackTrace}"), "exception", entry.Name);
-
-									using (var errorReport = client.PostAsync($"{server}/p4k/exception/{entry.Name}", content).Result)
-									{
-										if (errorReport.StatusCode == System.Net.HttpStatusCode.OK)
-										{
-											Console.WriteLine("This exception has been reported.");
-										}
-									}
-								}
+							using HttpResponseMessage errorReport = client.PostAsync($"{server}/p4k/exception/{entry.Name}", content).Result;
+							if (errorReport.StatusCode == System.Net.HttpStatusCode.OK)
+							{
+								Console.WriteLine("This exception has been reported.");
 							}
 						}
 						catch (Exception)
